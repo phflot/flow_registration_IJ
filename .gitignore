@@ -1,0 +1,16 @@
+# Maven #
+/target/
+
+# metrics:
+codemr/
+
+*.log
+
+.vs/
+
+data/
+
+.project
+.classpath
+.settings/
+bin/
