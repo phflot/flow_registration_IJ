@@ -24,6 +24,7 @@ import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class Util {
 	
@@ -167,6 +168,26 @@ public class Util {
 		}
 		
 		return max;
+	}
+	
+	public static <I extends PlanarImg<FloatType, FloatArray>> I getMean3(I img) {
+
+		@SuppressWarnings("unchecked")
+		I output = (I)img.factory().create(img.dimension(0), img.dimension(1));
+		float[] data_array = output.getPlane(0).getCurrentStorageArray();
+		for (int i = 0; i < data_array.length; i++)
+			data_array[i] = 0.0f;
+		
+		IntStream.rangeClosed(0, img.numSlices() - 1).forEach(n -> {
+			float[] tmp = img.getPlane(n).getCurrentStorageArray();
+			for (int i = 0; i < data_array.length; i++)
+				data_array[i] += tmp[i];
+		});
+		
+		for (int i = 0; i < data_array.length; i++)
+			data_array[i] /= (float)img.numSlices();
+		
+		return output;
 	}
 	
 	
@@ -332,6 +353,7 @@ public class Util {
 		}
 	}
 	
+
 	/**
 	 * subtracts the two images into the first
 	 * @param <T>
