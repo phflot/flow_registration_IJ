@@ -2,7 +2,7 @@
 
 The preprint of our paper can later be found on [bioRxiv](https://www.biorxiv.org/) and the project website [here](http://www.snnu.uni-saarland.de/flow_registration/).
 
-![Fig1](img/bg.jpg)
+![Fig1](src/main/ressources/img/bg.jpg)
 
 
 ## Download

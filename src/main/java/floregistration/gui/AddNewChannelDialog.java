@@ -10,16 +10,19 @@ import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.util.List;
 
+import org.scijava.command.Interactive;
+
 import floregistration.algorithm.RegistrationChannelOptions;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.gui.NonBlockingGenericDialog;
 import net.imglib2.img.imageplus.ImagePlusImg;
 
 /**
  * Dialog that adds a new channel for the registration
- * @author Philipp Flotho
  *
  */
-public class AddNewChannelDialog extends NonBlockingGenericDialog {
+public class AddNewChannelDialog extends GenericDialog {
 		
 	private static final long serialVersionUID = 2206943449958360921L;
 	
@@ -33,7 +36,7 @@ public class AddNewChannelDialog extends NonBlockingGenericDialog {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public AddNewChannelDialog(String title, Frame parent, List<ImagePlusImg> images) {
-		super(title);
+		super(title, parent);
 				
 		setOKLabel("Add");
 		setResizable(false);
@@ -46,6 +49,9 @@ public class AddNewChannelDialog extends NonBlockingGenericDialog {
 			open_images[i] = images.get(i).getImagePlus().getShortTitle();
 		}
 		
+		images.get(0).getImagePlus().copy();
+		ImagePlus currentImage = ImagePlus.getClipboard();
+		
 		// Selection of the input image:
 		addChoice("Channel", open_images, open_images[0]);
 		final Choice imp_choice = (Choice)this.getChoices().lastElement();
@@ -54,8 +60,12 @@ public class AddNewChannelDialog extends NonBlockingGenericDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				registrationChannelOptions.setImg(images.get(imp_choice.getSelectedIndex()));
+				currentImage.setImage(images.get(imp_choice.getSelectedIndex()).getImagePlus());
+				repaint();
 			}
 		});
+		addImage(currentImage);
+
 		
 		// Selection of sigma x
 		addNumericField("sigma x", registrationChannelOptions.getSigma()[0], 2);

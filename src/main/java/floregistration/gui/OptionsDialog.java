@@ -7,6 +7,7 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.Scrollbar;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,6 +33,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultFormatter;
+
+import bdv.ui.rangeslider.RangeSlider;
 
 import floregistration.algorithm.MotionCompensationWorker;
 import floregistration.algorithm.RegistrationChannelOptions;
@@ -219,8 +222,33 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 				registrationQualitySetting = qualityChoice.getSelectedIndex();
 			}
 		});
+		
+		Button referenceButton = new Button("select reference");
+		Panel referenceButtonPanel = new Panel();
+		referenceButtonPanel.setLayout(this.getLayout());
+		addPanel(referenceButtonPanel);
+		referenceButtonPanel.add(referenceButton);
+		referenceButton.addActionListener(new ActionListener() {
 
-		JLabel projectLink = new JLabel("<html>This plugin is based on a publication <br />Visit our <a href=''>project website</a><br /></html>");
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		
+		// Panel that contains the scroll pane for the registered frames
+		Panel registerTargetPanel = new Panel();
+		registerTargetPanel.setLayout(this.getLayout());
+		addPanel(registerTargetPanel);
+		RangeSlider registerTargetScrollbar = new RangeSlider();
+		registerTargetPanel.add(new JLabel("Registration Target Frames:"));
+		registerTargetPanel.add(registerTargetScrollbar);
+		
+
+		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href=''>project website</a><br /></html>");
 
 		Panel projectLabelPanel = new Panel();
 		projectLabelPanel.setLayout(this.getLayout());
