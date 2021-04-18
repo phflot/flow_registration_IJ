@@ -11,16 +11,15 @@ import java.awt.event.TextListener;
 import java.util.List;
 
 import floregistration.algorithm.RegistrationChannelOptions;
-import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import net.imglib2.img.imageplus.ImagePlusImg;
-import net.imglib2.type.NativeType;
 
 /**
  * Dialog that adds a new channel for the registration
  * @author Philipp Flotho
  *
  */
-public class AddNewChannelDialog extends GenericDialog {
+public class AddNewChannelDialog extends NonBlockingGenericDialog {
 		
 	private static final long serialVersionUID = 2206943449958360921L;
 	
@@ -34,7 +33,7 @@ public class AddNewChannelDialog extends GenericDialog {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public AddNewChannelDialog(String title, Frame parent, List<ImagePlusImg> images) {
-		super(title, parent);
+		super(title);
 				
 		setOKLabel("Add");
 		setResizable(false);

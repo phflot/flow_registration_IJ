@@ -39,20 +39,18 @@ import floregistration.algorithm.RegistrationJob;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import ij.gui.GenericDialog;
 import ij.gui.MessageDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.io.Opener;
 import net.imglib2.img.imageplus.ImagePlusImg;
 import net.imglib2.img.imageplus.ImagePlusImgs;
-import net.imglib2.type.NativeType;
 
 /**
  * Main Dialog to select the solver and image parameters
- * @author Philipp Flotho
  * @param parent
  * @param images
  */
-public class OptionsDialog extends GenericDialog {
+public class OptionsDialog extends NonBlockingGenericDialog {
 	
 	private static final long serialVersionUID = -1425554761163870030L;
 	private List<ImagePlusImg> images;
@@ -94,7 +92,7 @@ public class OptionsDialog extends GenericDialog {
 	}
 
 	public OptionsDialog(final Frame parent, List<ImagePlusImg> images) {
-		super("Flow Registration", parent);
+		super("Flow Registration");
 		this.images = images;
 		
 		setResizable(false);
