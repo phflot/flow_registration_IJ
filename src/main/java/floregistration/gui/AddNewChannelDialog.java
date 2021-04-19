@@ -85,35 +85,41 @@ public class AddNewChannelDialog extends GenericDialog {
 		});
 		repaint();
 
+		addCheckbox("2D symmetric kernel", registrationChannelOptions.isInplace());
+		final Checkbox symKernelBox = (Checkbox)super.getCheckboxes().lastElement();
+		symKernelBox.setState(true);
 		
 		// Selection of sigma x
 		this.addSlider("sigma x", 0.05f, 5.0f, registrationChannelOptions.getSigma()[0]);
 		final TextField sigmax_field = ((TextField)super.getNumericFields().lastElement());
-		registrationChannelOptions.getSigma()[0] = Float.parseFloat(sigmax_field.getText());
+		
+		this.addSlider("sigma y", 0.05f, 5.0f, registrationChannelOptions.getSigma()[1]);
+		final TextField sigmay_field = ((TextField)super.getNumericFields().lastElement());
+		
 		sigmax_field.addTextListener(new TextListener() {
 			@Override
 			public void textValueChanged(TextEvent e) {
 				registrationChannelOptions.getSigma()[0] = Float.parseFloat(sigmax_field.getText());
+				if (symKernelBox.getState())
+					sigmay_field.setText(sigmax_field.getText());
 				repaint();
 			}
 		});
 		
 		// Selection of sigma y
-		this.addSlider("sigma y", 0.05f, 5.0f, registrationChannelOptions.getSigma()[1]);
-		final TextField sigmay_field = ((TextField)super.getNumericFields().lastElement());
-		registrationChannelOptions.getSigma()[1] = Float.parseFloat(sigmay_field.getText());
 		sigmay_field.addTextListener(new TextListener() {
 			@Override
 			public void textValueChanged(TextEvent e) {
 				registrationChannelOptions.getSigma()[1] = Float.parseFloat(sigmay_field.getText());
-				repaint();
+				if (symKernelBox.getState())
+					sigmax_field.setText(sigmay_field.getText());
+					repaint();			
 			}
 		});
 		
 		// Selection of sigma z
 		this.addSlider("sigma z", 0.05f, 5.0f, registrationChannelOptions.getSigma()[2]);
 		final TextField sigmaz_field = ((TextField)super.getNumericFields().lastElement());
-		registrationChannelOptions.getSigma()[2] = Float.parseFloat(sigmaz_field.getText());
 		sigmaz_field.addTextListener(new TextListener() {
 			@Override
 			public void textValueChanged(TextEvent e) {
@@ -131,9 +137,8 @@ public class AddNewChannelDialog extends GenericDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				registrationChannelOptions.setInplace(isInplaceBox.getState());
-				repaint();
 			}
-		});	
+		});
 	}
 	
 	public void repaint() {
