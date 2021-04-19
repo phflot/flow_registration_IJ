@@ -2,6 +2,7 @@ package floregistration;
 
 import ij.IJ;
 import ij.WindowManager;
+import ij.gui.MessageDialog;
 import ij.plugin.*;
 import net.imglib2.img.imageplus.ImagePlusImg;
 import net.imglib2.img.imageplus.ImagePlusImgs;
@@ -35,6 +36,10 @@ public class FloRegistration implements PlugIn {
 			images.add(i, ImagePlusImgs.from(WindowManager.getImage(imageIDX[i])));
 		}
 		
-		new OptionsDialog(IJ.getInstance(), images).showDialog();
+		if (nImages == 0)
+			new MessageDialog(IJ.getInstance(), "Error starting Plugin", 
+					"Plugin needs at least one open Image!");
+		else
+			new OptionsDialog(IJ.getInstance(), images).showDialog();
 	}
 }

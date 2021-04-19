@@ -1,6 +1,7 @@
 package floregistration.gui;
 
 import java.awt.Button;
+import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Desktop;
 import java.awt.Frame;
@@ -191,25 +192,54 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			}
 		});
 		
+		
+		addCheckbox("Symmetric smoothness weight", true);
+		final Checkbox symSmoothBox = (Checkbox)super.getCheckboxes().lastElement();
 		// Selection of alpha x:
-		addNumericField("alpha x", registrationJob.getAlpha()[0], 2);
-		final TextField alphax_field = ((TextField)super.getNumericFields().lastElement());
-		registrationJob.getAlpha()[0] = Float.parseFloat(alphax_field.getText());
-		alphax_field.addTextListener(new TextListener() {
+		addSlider("Smoothness alpha x", 0.1, 5, registrationJob.getAlpha()[0]);
+		final TextField alphaXField = ((TextField)super.getNumericFields().lastElement());
+		registrationJob.getAlpha()[0] = Float.parseFloat(alphaXField.getText());
+
+		
+		// Selection of alpha y:
+		addSlider("Smoothness alpha y", 0.1, 5, registrationJob.getAlpha()[1]);
+		final TextField alphaYField = ((TextField)super.getNumericFields().lastElement());
+		final Scrollbar alphaYSlider = (Scrollbar)getSliders().lastElement();
+		alphaYField.setEnabled(false);
+		alphaYSlider.setEnabled(false);
+		
+		registrationJob.getAlpha()[1] = Float.parseFloat(alphaYField.getText());
+		
+		
+		alphaXField.addTextListener(new TextListener() {
 			@Override
 			public void textValueChanged(TextEvent e) {
-				registrationJob.getAlpha()[0] = Float.parseFloat(alphax_field.getText());
+				registrationJob.getAlpha()[0] = Float.parseFloat(alphaXField.getText());
+				if (symSmoothBox.getState()) {
+					alphaYField.setText(alphaXField.getText());
+				}
+			}
+		});
+		alphaYField.addTextListener(new TextListener() {
+			@Override
+			public void textValueChanged(TextEvent e) {
+				registrationJob.getAlpha()[1] = Float.parseFloat(alphaYField.getText());
+				if (symSmoothBox.getState()) {
+					alphaXField.setText(alphaYField.getText());
+				}
 			}
 		});
 		
-		// Selection of alpha y:
-		addNumericField("alpha y", registrationJob.getAlpha()[1], 2);
-		final TextField alphay_field = ((TextField)super.getNumericFields().lastElement());
-		registrationJob.getAlpha()[1] = Float.parseFloat(alphay_field.getText());
-		alphay_field.addTextListener(new TextListener() {
+		symSmoothBox.addItemListener(new ItemListener() {
 			@Override
-			public void textValueChanged(TextEvent e) {
-				registrationJob.getAlpha()[1] = Float.parseFloat(alphay_field.getText());
+			public void itemStateChanged(ItemEvent e) {
+				if (symSmoothBox.getState()) {
+					alphaYField.setEnabled(false);
+					alphaYSlider.setEnabled(false);
+				} else {
+					alphaYField.setEnabled(true);
+					alphaYSlider.setEnabled(true);
+				}
 			}
 		});
 		
@@ -232,8 +262,19 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				
+				if (registrationJob.isEmpty()) {
+					new MessageDialog(IJ.getInstance(), "Error selecting reference", 
+							"At least one channel needs to be selected before reference selection is possible!");
+					return;
+				}
+				
+				ReferenceDialog referenceDialog = new ReferenceDialog(
+						"Define reference frames", parent, registrationJob);
+				referenceDialog.showDialog();
+				if (referenceDialog.wasOKed()) {
+
+				}
 			}
 			
 		});
