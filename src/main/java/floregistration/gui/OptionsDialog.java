@@ -62,38 +62,6 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 	private int nChannels = 0;
 	private RegistrationJob registrationJob = new RegistrationJob();
 	
-	public static void main(String[] args) {
-		ImageJ ij = new ImageJ();
-		
-		File file = new File("data/16bit_injection_ch1_shift.tif");
-		final ImagePlus impCh1Shift = new Opener().openImage(file.getAbsolutePath());
-		
-		file = new File("data/injection_ch1.tif");
-		final ImagePlus impCh1 = new Opener().openImage(file.getAbsolutePath());
-		
-		file = new File("data/injection_ch1_full.tif");
-		final ImagePlus impCh2 = new Opener().openImage(file.getAbsolutePath());
-		
-		file = new File("data/jupiter.tif");
-		final ImagePlus impJup = new Opener().openImage(file.getAbsolutePath());
-		
-		final List<ImagePlusImg> images = 
-				new ArrayList<ImagePlusImg>();
-		
-		images.add(ImagePlusImgs.from(impCh1));
-		images.add(ImagePlusImgs.from(impCh2));
-		images.add(ImagePlusImgs.from(impCh1Shift));
-		images.add(ImagePlusImgs.from(impJup));
-		
-		System.out.println(images.get(0).getDepth());
-		
-		impCh1.show();
-		impCh2.show();
-		impJup.show();
-		impCh1Shift.show();
-		
-		new OptionsDialog(ij, images).showDialog();
-	}
 
 	public OptionsDialog(final Frame parent, List<ImagePlusImg> images) {
 		super("Flow Registration");

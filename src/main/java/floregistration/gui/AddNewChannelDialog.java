@@ -91,7 +91,6 @@ public class AddNewChannelDialog extends GenericDialog {
 		images.get(0).dimensions(dims);
 		currentImageIMP = images.get(0).factory().create(new long[] {dims[0], dims[1], 1}).getImagePlus();
 		setPreviewStack(images.get(0));
-		updateGauss();
 		addImage(currentImageIMP);
 		
 		//timeSlider = new Scrollbar(Scrollbar.HORIZONTAL, 1, 5, 1, 10);
@@ -107,7 +106,7 @@ public class AddNewChannelDialog extends GenericDialog {
 		addChoice("Channel:", open_images, open_images[0]);
 		impChoice = (Choice)this.getChoices().lastElement();
 		registrationChannelOptions.setImg(images.get(impChoice.getSelectedIndex()));
-		setPreviewStack(images.get(impChoice.getSelectedIndex()));
+		// setPreviewStack(images.get(impChoice.getSelectedIndex()));
 		impChoice.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -116,7 +115,6 @@ public class AddNewChannelDialog extends GenericDialog {
 				timeSlider.setMaximum((int) dims[2]);
 			}
 		});
-		repaint();
 		
 		
 		timeSliderValue.addTextListener(new TextListener() {
