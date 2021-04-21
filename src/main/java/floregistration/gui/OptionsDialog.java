@@ -71,7 +71,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		file = new File("data/injection_ch1.tif");
 		final ImagePlus impCh1 = new Opener().openImage(file.getAbsolutePath());
 		
-		file = new File("data/injection_ch2.tif");
+		file = new File("data/injection_ch1_full.tif");
 		final ImagePlus impCh2 = new Opener().openImage(file.getAbsolutePath());
 		
 		file = new File("data/jupiter.tif");
@@ -196,13 +196,13 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		addCheckbox("Symmetric smoothness weight", true);
 		final Checkbox symSmoothBox = (Checkbox)super.getCheckboxes().lastElement();
 		// Selection of alpha x:
-		addSlider("Smoothness alpha x", 0.1, 5, registrationJob.getAlpha()[0]);
+		addSlider("Smoothness x", 0.1, 5, registrationJob.getAlpha()[0]);
 		final TextField alphaXField = ((TextField)super.getNumericFields().lastElement());
 		registrationJob.getAlpha()[0] = Float.parseFloat(alphaXField.getText());
 
 		
 		// Selection of alpha y:
-		addSlider("Smoothness alpha y", 0.1, 5, registrationJob.getAlpha()[1]);
+		addSlider("Smoothness y", 0.1, 5, registrationJob.getAlpha()[1]);
 		final TextField alphaYField = ((TextField)super.getNumericFields().lastElement());
 		final Scrollbar alphaYSlider = (Scrollbar)getSliders().lastElement();
 		alphaYField.setEnabled(false);
@@ -286,7 +286,9 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		addPanel(registerTargetPanel);
 		RangeSlider registerTargetScrollbar = new RangeSlider();
 		registerTargetPanel.add(new JLabel("Registration Target Frames:"));
-		registerTargetPanel.add(registerTargetScrollbar);
+		Panel rangeSliderPanel = new Panel();
+		rangeSliderPanel.add(registerTargetScrollbar);
+		addPanel(rangeSliderPanel);
 		
 
 		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href=''>project website</a><br /></html>");

@@ -3,6 +3,8 @@ package floregistration.gui;
 import java.awt.Frame;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.event.WindowEvent;
+import java.util.LinkedList;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -16,17 +18,22 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.MessageDialog;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.imageplus.ImagePlusImg;
+import net.imglib2.img.imageplus.ImagePlusImgFactory;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.numeric.ComplexType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 
 public class ReferenceDialog extends GenericDialog {
 	
 	private final RegistrationJob channels;
-	private ImagePlusImg<? extends ComplexType, FloatArray> meanImage;
+	private LinkedList<ImagePlusImg<FloatType, FloatArray>> inputImgs = new LinkedList<ImagePlusImg<FloatType, FloatArray>>();
+	private ImagePlusImg<FloatType, FloatArray> meanImage;
 	private ImagePlus meanImageIMP;
 	private final RangeSlider rangeSlider;
 	long nFrames = 0;
@@ -46,10 +53,15 @@ public class ReferenceDialog extends GenericDialog {
 		nFrames = dims[2];
 		dims[2] = channels.size();
 		
-		meanImage = channels.getFirst().getImg().factory().create(dims);
+		ImgFactory<FloatType> factory = new ImagePlusImgFactory<FloatType>(new FloatType());
+		meanImage = (ImagePlusImg<FloatType, FloatArray>) factory.create(dims);
 		meanImageIMP = meanImage.getImagePlus();
 		addImage(meanImageIMP);
-
+		
+		for (RegistrationChannelOptions r : channels) {
+			inputImgs.add((ImagePlusImg<FloatType, FloatArray>) Util.imgToFloat(r.getImg()));
+		}
+		
 		//RandomAccessibleInterval view = Views.interval(images.get(impChoice.getSelectedIndex()), 
 		//		new long[]{0, 0, 0}, viewDims);
 		
@@ -73,13 +85,22 @@ public class ReferenceDialog extends GenericDialog {
 	
 	private void updateMeanImage() {
 		for (int i = 0; i < channels.size(); i++) {
-			PlanarImg<? extends ComplexType, FloatArray> tmp = 
-					(PlanarImg<? extends ComplexType, FloatArray>)
-					 Util.getMean3(channels.get(i).getImg(), 
+			ImagePlusImg<FloatType, FloatArray> tmp = 
+					(ImagePlusImg<FloatType, FloatArray>)
+					 Util.getMean3f(inputImgs.get(i), 
 							 rangeSlider.getValue(), rangeSlider.getUpperValue());
 			meanImage.setPlane(i, tmp.getPlane(0));
 		}
 		meanImageIMP.setImage(meanImage.getImagePlus());
 		super.repaint();
+	}
+	
+	@Override
+	public void windowClosed(WindowEvent e) {
+		for (ImagePlusImg<FloatType, FloatArray> img : inputImgs) {
+			img.close();
+		}
+		meanImage.close();
+		meanImageIMP.close();
 	}
 }

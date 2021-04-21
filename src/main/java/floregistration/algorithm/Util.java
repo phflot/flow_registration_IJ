@@ -112,28 +112,36 @@ public class Util {
 		return out;
 	}
 	
+	
 	public static <T extends NativeType<T> & ComplexType<T>, I extends IterableInterval<T> & RandomAccessibleInterval<T>>
-	ImagePlusImg<FloatType, FloatArray> imgToFloatNormalize(I img, float minValue, float maxValue) {
+		ImagePlusImg<FloatType, FloatArray> imgToFloatNormalize(I img) {
 	
-	Cursor<T> inCursor = img.cursor();
-	
-	long[] dims = new long[img.numDimensions()];
-	img.dimensions(dims);
-	
-	@SuppressWarnings("unchecked")
-	ImagePlusImg<FloatType, FloatArray> out = (ImagePlusImg<FloatType, FloatArray>) 
-		new ImagePlusImgFactory<FloatType>(new FloatType()).create(dims);
-	
-	Cursor<FloatType> outCursor = out.cursor();
-	
-	while(inCursor.hasNext()) {
-		inCursor.fwd();
-		outCursor.fwd();
-		
-		outCursor.get().setReal((inCursor.get().getRealFloat() - minValue) / (maxValue - minValue));
+		return imgToFloatNormalize(img, (float)getMin(img), (float)getMax(img));
 	}
 	
-	return out;
+	
+	public static <T extends NativeType<T> & ComplexType<T>, I extends IterableInterval<T> & RandomAccessibleInterval<T>>
+		ImagePlusImg<FloatType, FloatArray> imgToFloatNormalize(I img, float minValue, float maxValue) {
+		
+		Cursor<T> inCursor = img.cursor();
+		
+		long[] dims = new long[img.numDimensions()];
+		img.dimensions(dims);
+		
+		@SuppressWarnings("unchecked")
+		ImagePlusImg<FloatType, FloatArray> out = (ImagePlusImg<FloatType, FloatArray>) 
+			new ImagePlusImgFactory<FloatType>(new FloatType()).create(dims);
+		
+		Cursor<FloatType> outCursor = out.cursor();
+		
+		while(inCursor.hasNext()) {
+			inCursor.fwd();
+			outCursor.fwd();
+			
+			outCursor.get().setReal((inCursor.get().getRealFloat() - minValue) / (maxValue - minValue));
+		}
+		
+		return out;
 	}
 	
 	public static <T extends ComplexType<T>, I extends IterableInterval<T>>
@@ -170,7 +178,29 @@ public class Util {
 		return max;
 	}
 	
-	public static <I extends PlanarImg<FloatType, FloatArray>> I getMean3(I img) {
+	
+	public static <T extends NativeType<T> & ComplexType<T>, I extends IterableInterval<T> & RandomAccessibleInterval<T>>
+	ImagePlusImg<FloatType, FloatArray> getMean3(I img) {
+		ImagePlusImg<FloatType, FloatArray> tmp = imgToFloat(img);
+		ImagePlusImg<FloatType, FloatArray> result = getMean3(tmp, 0, tmp.numSlices());
+		tmp.close();
+		return result;
+	}
+	
+	public static <T extends NativeType<T> & ComplexType<T>, I extends IterableInterval<T> & RandomAccessibleInterval<T>>
+	ImagePlusImg<FloatType, FloatArray> getMean3(I img, int low, int high) {
+		ImagePlusImg<FloatType, FloatArray> tmp = imgToFloat(img);
+		ImagePlusImg<FloatType, FloatArray> result = getMean3f(tmp, low, high);
+		tmp.close();
+		return result;
+	}
+	
+	
+	public static <I extends PlanarImg<FloatType, FloatArray>> I getMean3f(I img) {	
+		return getMean3f(img, 0, img.numSlices() - 1);
+	}
+	
+	public static <I extends PlanarImg<FloatType, FloatArray>> I getMean3f(I img, int low, int high) {
 
 		@SuppressWarnings("unchecked")
 		I output = (I)img.factory().create(img.dimension(0), img.dimension(1));
@@ -178,14 +208,17 @@ public class Util {
 		for (int i = 0; i < data_array.length; i++)
 			data_array[i] = 0.0f;
 		
-		IntStream.rangeClosed(0, img.numSlices() - 1).forEach(n -> {
+		assert low >= 0;
+		assert high < img.numSlices();
+		
+		IntStream.rangeClosed(low, high).forEach(n -> {
 			float[] tmp = img.getPlane(n).getCurrentStorageArray();
 			for (int i = 0; i < data_array.length; i++)
 				data_array[i] += tmp[i];
 		});
 		
 		for (int i = 0; i < data_array.length; i++)
-			data_array[i] /= (float)img.numSlices();
+			data_array[i] /= (float)high-low;
 		
 		return output;
 	}

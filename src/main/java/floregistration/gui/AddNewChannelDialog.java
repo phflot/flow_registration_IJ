@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -93,13 +94,14 @@ public class AddNewChannelDialog extends GenericDialog {
 		updateGauss();
 		addImage(currentImageIMP);
 		
-		timeSlider = new Scrollbar(Scrollbar.HORIZONTAL, 1, 5, 1, 10);
-		timeSlider.setSize(new Dimension(512, 10));
-		// this.addSlider("", 1, 1, 1);
-		this.add(timeSlider);
-		//final TextField timeSliderValue = ((TextField)super.getNumericFields().lastElement());
-		//timeSliderValue.setVisible(false);
-		// timeSlider = (Scrollbar)super.getSliders().lastElement();
+		//timeSlider = new Scrollbar(Scrollbar.HORIZONTAL, 1, 5, 1, 10);
+		//timeSlider.setSize(new Dimension(512, 10));
+		//this.add(timeSlider);
+
+		this.addSlider("time", 1, dims[2], 1);
+		final TextField timeSliderValue = ((TextField)super.getNumericFields().lastElement());
+		timeSliderValue.setVisible(false);
+		timeSlider = (Scrollbar)super.getSliders().lastElement();
 		
 		// Selection of the input image:
 		addChoice("Channel:", open_images, open_images[0]);
@@ -116,14 +118,14 @@ public class AddNewChannelDialog extends GenericDialog {
 		});
 		repaint();
 		
-		/*
+		
 		timeSliderValue.addTextListener(new TextListener() {
 			@Override
 			public void textValueChanged(TextEvent e) {
-				currentImage.setSlice(Integer.parseInt(timeSliderValue.getText()));
+				currentImageIMP.setSlice(Integer.parseInt(timeSliderValue.getText()));
 				updateImg();
 			}
-		});*/
+		});
 		
 		addCheckbox("2D symmetric kernel", true);
 		final Checkbox symKernelBox = (Checkbox)super.getCheckboxes().lastElement();
@@ -259,6 +261,8 @@ public class AddNewChannelDialog extends GenericDialog {
 		RandomAccessibleInterval view = Views.interval(img, 
 				new long[]{0, 0, 0}, viewDims);
 		
+		if (currentImageStack != null)
+			currentImageStack.close();
 		currentImageStack = img.factory().create(newDims);
 
 		Cursor<? extends ComplexType> target = currentImageStack.localizingCursor();
@@ -272,6 +276,15 @@ public class AddNewChannelDialog extends GenericDialog {
 		dims = newDims;
 		updateGauss();
 	}
+	
+	
+	@Override
+	public void windowClosed(WindowEvent e) {
+		this.currentImageIMP.close();
+		this.currentImageStack.close();
+		super.windowClosed(e);
+	}
+	
 	/*
 	public void repaint() {
 		/*

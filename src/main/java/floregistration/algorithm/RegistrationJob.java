@@ -17,6 +17,8 @@ import net.imglib2.type.numeric.real.FloatType;
 public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	
 	private int nSlices = 0;
+	//Todo: replace nSlices with an index array
+	private int[] registrationIndices;
 	private int height = 0;
 	private int width = 0;
 	
