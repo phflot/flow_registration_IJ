@@ -72,6 +72,16 @@
     </properties>
 
 	<dependencies>
+		<!-- SCIFIO dependencies -->
+		<dependency>
+			<groupId>io.scif</groupId>
+			<artifactId>scifio</artifactId>
+		</dependency>
+		<!-- SciJava dependencies -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
 		<!-- ImageJ: -->
 		<dependency>
 			<groupId>net.imagej</groupId>

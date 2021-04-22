@@ -61,6 +61,10 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 	private int registrationQualitySetting = 1;
 	private int nChannels = 0;
 	private RegistrationJob registrationJob = new RegistrationJob();
+	private final TextField strideField;
+	private int stride = 1;
+	private final double[] registerTarget = new double[2];
+	private final RangeSlider registerTargetSlider;
 	
 
 	public OptionsDialog(final Frame parent, List<ImagePlusImg> images) {
@@ -252,12 +256,68 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		Panel registerTargetPanel = new Panel();
 		registerTargetPanel.setLayout(this.getLayout());
 		addPanel(registerTargetPanel);
-		RangeSlider registerTargetScrollbar = new RangeSlider();
+		registerTargetSlider = new RangeSlider(0, 999);
+		registerTargetSlider.setValue(0);
+		registerTargetSlider.setUpperValue(999);
 		registerTargetPanel.add(new JLabel("Registration Target Frames:"));
 		Panel rangeSliderPanel = new Panel();
-		rangeSliderPanel.add(registerTargetScrollbar);
+		rangeSliderPanel.add(registerTargetSlider);
 		addPanel(rangeSliderPanel);
 		
+		registerTargetSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				
+				int lower = registerTargetSlider.getValue();
+				int upper = registerTargetSlider.getUpperValue();
+				
+				if (lower == upper) {
+					lower -= lower == registerTargetSlider.getMinimum() ? 0 : 1;
+					upper += lower == registerTargetSlider.getMinimum() ? 1 : 0;
+					
+					registerTargetSlider.setValue(lower);
+					registerTargetSlider.setUpperValue(upper);
+				}
+				
+				registerTarget[0] = (double)lower / (double)(registerTargetSlider.getMaximum() - registerTargetSlider.getMinimum());
+				registerTarget[1] = (double)upper / (double)(registerTargetSlider.getMaximum() - registerTargetSlider.getMinimum());
+				
+				/*
+				int upper = registerTargetSlider.getUpperValue();
+				lower = lower < 0 ? 0 : lower;
+				
+				if (registrationJob.getNslices() < 0) {
+					registerTarget[0] = lower;
+					registerTarget[1] = upper;
+				}
+				
+				
+				if (upper >= registrationJob.getNslices() && registrationJob.getNslices() > 0) { 
+					upper = registrationJob.getNslices() - 1;
+				}
+				registerTarget[0] = lower;
+				registerTarget[1] = upper;*/
+			}
+		});
+		
+		// Selection of stride
+		addSlider("Stride: ", 1, 10, stride);
+		strideField = ((TextField)super.getNumericFields().lastElement());
+		strideField.addTextListener(new TextListener() {	
+			@Override
+			public void textValueChanged(TextEvent e) {
+				int newStride = Integer.parseInt(strideField.getText());
+				if (newStride < 1) {
+					newStride = 1;
+					strideField.setText("1");
+				}
+				if (newStride >= registrationJob.getNslices() && registrationJob.getNslices() > 0) {
+					newStride = registrationJob.getNslices() - 1;
+					strideField.setText(Integer.toString(registrationJob.getNslices()));
+				}
+				stride = newStride;
+			}
+		});
 
 		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href=''>project website</a><br /></html>");
 
@@ -280,6 +340,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 				}
 			}
 		});
+		
 	}
 	
 	public synchronized void actionPerformed(final ActionEvent event) {
@@ -318,5 +379,9 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 				registrationJob.setEta(0.9f);
 				break;
 		}
+		int newStride = Integer.parseInt(strideField.getText());
+		
+		registrationJob.setRange(this.registerTarget[0], this.registerTarget[1]);
+		registrationJob.setStride(newStride);
 	}
 }

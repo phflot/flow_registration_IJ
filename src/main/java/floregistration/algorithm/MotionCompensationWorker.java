@@ -197,17 +197,22 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		ImagePlusImg<FloatType, FloatArray> wInit = (ImagePlusImg<FloatType, FloatArray>) factory.create(width, height, 2);
 		
 		startTime = System.currentTimeMillis();
-		IntStream.rangeClosed(0, registrationJob.getNslices() - 1).parallel().forEach(n -> {
+		IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).parallel().forEach(n -> {
 		//IntStream.rangeClosed(0, registrationJob.getNslices() - 1).forEach(n -> {
-			ImagePlusImg<FloatType, FloatArray> img = intermediateStructs.getFramesLow(n);
-			ImagePlusImg registrationTargets = intermediateStructs.getFrames(n);
+			int idx = registrationJob.getIdxAt(n);
+			ImagePlusImg<FloatType, FloatArray> img = intermediateStructs.getFramesLow(idx);
+			ImagePlusImg registrationTargets = intermediateStructs.getFrames(idx);
 			
 			RegistrationResult registrationResult = ofInstance.compensate(img, ref, 
 					dataWeightArray, wInit, registrationTargets);
 			
 			for (int i = 0; i < intermediateStructs.size(); i++) {
 				IntermediateStruct s = (IntermediateStruct) intermediateStructs.get(i);
-				s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
+				
+				if (registrationJob.get(i).isInplace())
+					s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
+				else
+					s.getRegistrationTarget().setPlane(idx, registrationResult.getRegistered().getPlane(i));
 			}
 			
 			processedFrameNotification();

@@ -17,10 +17,13 @@ import net.imglib2.type.numeric.real.FloatType;
 public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	
 	private int nSlices = 0;
-	//Todo: replace nSlices with an index array
-	private int[] registrationIndices;
+	private int stride = 1;
+	private int[] registrationIDX;
 	private int height = 0;
 	private int width = 0;
+	private int lowerIDX = 0;
+	private int upperIDX = 0;
+	
 	
 	/**
 	 * Solver Options
@@ -80,6 +83,14 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	public int getNslices() {
 		return nSlices;
 	}
+	
+	public int getNRegistrationTargets() {
+		return this.registrationIDX.length;
+	}
+	
+	public int getIdxAt(int i) {
+		return this.registrationIDX[i];
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -95,6 +106,8 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 			this.nSlices = tmp_slices;
 			this.height = tmp_height;
 			this.width = tmp_width;
+			this.upperIDX = this.nSlices - 1;
+			updateIndices();
 		}
 		else {
 			if (tmp_slices != nSlices || tmp_height != height
@@ -103,6 +116,40 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		}
 		return super.add(e);
 	}
+	
+	@Override
+	public RegistrationChannelOptions get(int i) {
+		return (RegistrationChannelOptions) super.get(i);
+	}
+	
+	
+	public void setStride(int stride) {
+		this.stride = stride > (this.upperIDX - this.lowerIDX) ? (this.upperIDX - this.lowerIDX) : stride;
+		updateIndices();
+	}
+	
+	public void setRange(double lower, double upper) {
+		assert lower <= 1.0f & lower >= 0.0f;
+		assert upper <= 1.0f & upper >= 0.0f;
+		
+		this.lowerIDX = (int) Math.round((float)(this.nSlices - 1) * lower);
+		this.upperIDX = (int) Math.round((float)(this.nSlices - 1) * upper);
+		
+		if (lower == upper) {
+			this.lowerIDX -= lower == 0 ? 0 : 1;
+			this.upperIDX += lower == 0 ? 1 : 0;
+		}
+		updateIndices();
+	}
+	
+	private void updateIndices() {
+		int nRegistrationFrames = (int)Math.round((double)(this.upperIDX - this.lowerIDX) / (double)this.stride);
+		this.registrationIDX = new int[nRegistrationFrames];
+		for (int i = 0; i < nRegistrationFrames; i++) {
+			this.registrationIDX[i] = i * this.stride + this.lowerIDX;
+		}
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	public ImagePlusImg<FloatType, FloatArray> getDataWeightArray() {
