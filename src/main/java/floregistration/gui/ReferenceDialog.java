@@ -3,6 +3,7 @@ package floregistration.gui;
 import java.awt.Frame;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.util.LinkedList;
 
@@ -10,6 +11,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import bdv.ui.rangeslider.RangeSlider;
+import floregistration.algorithm.MotionCompensationWorker;
 import floregistration.algorithm.RegistrationChannelOptions;
 import floregistration.algorithm.RegistrationJob;
 import floregistration.algorithm.Util;
@@ -95,12 +97,12 @@ public class ReferenceDialog extends GenericDialog {
 		super.repaint();
 	}
 	
-	@Override
-	public void windowClosed(WindowEvent e) {
-		for (ImagePlusImg<FloatType, FloatArray> img : inputImgs) {
-			img.close();
-		}
+	public synchronized void actionPerformed(final ActionEvent event) {
+		super.actionPerformed(event);
 		meanImage.close();
 		meanImageIMP.close();
+		if (this.wasOKed()) {
+			this.channels.setReferenceIDX(rangeSlider.getValue(), rangeSlider.getUpperValue());
+		}
 	}
 }

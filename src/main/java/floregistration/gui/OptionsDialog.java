@@ -63,7 +63,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 	private RegistrationJob registrationJob = new RegistrationJob();
 	private final TextField strideField;
 	private int stride = 1;
-	private final double[] registerTarget = new double[2];
+	private final double[] registerTarget = new double[] {0, 1.0f};
 	private final RangeSlider registerTargetSlider;
 	
 
@@ -164,7 +164,6 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			}
 		});
 		
-		
 		addCheckbox("Symmetric smoothness weight", true);
 		final Checkbox symSmoothBox = (Checkbox)super.getCheckboxes().lastElement();
 		// Selection of alpha x:
@@ -250,7 +249,6 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			}
 			
 		});
-		
 		
 		// Panel that contains the scroll pane for the registered frames
 		Panel registerTargetPanel = new Panel();
@@ -356,7 +354,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		if (this.wasOKed()) {
 			parseOptions();
 			CompensationProgress progress_dialog = new CompensationProgress(IJ.getInstance(),
-					registrationJob.getNslices());
+					registrationJob.getNRegistrationTargets());
 			MotionCompensationWorker engine = 
 					new MotionCompensationWorker(registrationJob);
 			engine.addPropertyChangeListener(progress_dialog);

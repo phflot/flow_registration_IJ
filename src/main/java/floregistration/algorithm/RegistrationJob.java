@@ -23,6 +23,37 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	private int width = 0;
 	private int lowerIDX = 0;
 	private int upperIDX = 0;
+	private ReferenceFrames referenceFrames;
+	
+	private class ReferenceFrames {
+		
+		public int getLower() {
+			return lower;
+		}
+
+		public void setLower(int lower) {
+			this.lower = Math.min(lower, this.nSlices - 1);
+		}
+
+		public int getUpper() {
+			return upper;
+		}
+
+		public void setUpper(int upper) {
+			this.upper = Math.min(upper, this.nSlices - 1);
+		}
+
+		private int lower;
+		private int upper;
+		
+		private int nSlices;
+				
+		public ReferenceFrames(int nSlices) {
+			this.nSlices = nSlices;
+			lower = 0;
+			upper = Math.min(20, nSlices - 1);
+		}		
+	}
 	
 	
 	/**
@@ -107,6 +138,7 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 			this.height = tmp_height;
 			this.width = tmp_width;
 			this.upperIDX = this.nSlices - 1;
+			this.referenceFrames = new ReferenceFrames(nSlices);
 			updateIndices();
 		}
 		else {
@@ -125,6 +157,8 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	
 	public void setStride(int stride) {
 		this.stride = stride > (this.upperIDX - this.lowerIDX) ? (this.upperIDX - this.lowerIDX) : stride;
+		if (this.stride <= 1)
+			this.stride = 1;
 		updateIndices();
 	}
 	
@@ -135,9 +169,9 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		this.lowerIDX = (int) Math.round((float)(this.nSlices - 1) * lower);
 		this.upperIDX = (int) Math.round((float)(this.nSlices - 1) * upper);
 		
-		if (lower == upper) {
-			this.lowerIDX -= lower == 0 ? 0 : 1;
-			this.upperIDX += lower == 0 ? 1 : 0;
+		if (this.lowerIDX == this.upperIDX) {
+			this.lowerIDX -= this.lowerIDX == 0 ? 0 : 1;
+			this.upperIDX += this.lowerIDX == 0 ? 1 : 0;
 		}
 		updateIndices();
 	}
@@ -170,6 +204,20 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		}
 		
 		return dataWeightArray;
+	}
+	
+	public void setReferenceIDX(int lower, int upper) {
+		this.referenceFrames.setLower(lower);
+		this.referenceFrames.setUpper(upper);
+	}
+	
+	//TODO: needs to be replaced by a method that directly calculates the mean frames!
+	public int getMeanLowIDX() {
+		return this.referenceFrames.getLower();
+	}
+	
+	public int getMeanUpIDX() {
+		return this.referenceFrames.getUpper();
 	}
 	
 	public RegistrationJob() {

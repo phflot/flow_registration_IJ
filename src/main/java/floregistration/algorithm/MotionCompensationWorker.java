@@ -33,7 +33,7 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 	public MotionCompensationWorker(RegistrationJob registrationJob) {
 		ofInstance = registrationJob.getOFinstance();
 		this.registrationJob = registrationJob;
-		framesLeft = registrationJob.getNslices();
+		framesLeft = registrationJob.getNRegistrationTargets();
 	}
 	
 	
@@ -51,10 +51,10 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		
 		private final RegistrationChannelOptions<T, A> o;
 		private final ImagePlusImg<T, A> registrationTarget;
-		private final ImagePlusImg<T, A> imgLow;
+		private final ImagePlusImg<FloatType, FloatArray> imgLow;
 		
-		private final float minValue;
-		private final float maxValue;
+		//private final float minValue;
+		//private final float maxValue;
 		private final int width;
 		private final int height;
 		private final boolean isInplace;
@@ -82,7 +82,7 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		private final int nSlices;
 		
 		@SuppressWarnings("unchecked")
-		public IntermediateStruct(RegistrationChannelOptions<T, A> o) {
+		private IntermediateStruct(RegistrationChannelOptions<T, A> o, int nFrames) {
 			this.o = o;
 			
 			long[] dimsL = new long[o.getImg().numDimensions()];
@@ -94,19 +94,22 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 				counter++;
 			}
 			
+			int nSlicesOrig = dims[2];
+			dims[2] = o.isInplace() ? dims[2] : nFrames;
+			
 			this.width = dims[0];
 			this.height = dims[1];
 			this.nSlices = dims[2];
 			
 			ImagePlusImg<T, A> imgLow = (ImagePlusImg<T, A>) 
-					o.getImg().factory().create(width, height, nSlices);
+					o.getImg().factory().create(width, height, nSlicesOrig);
 
 			float[] s = o.getSigma();
 			Gauss3.gauss(new double[] {s[0], s[1], s[2]}, Views.extendBorder(o.getImg()), imgLow);
 			
-			this.imgLow = imgLow;
-			minValue = Util.getMin(imgLow);
-			maxValue = Util.getMax(imgLow);
+			this.imgLow = Util.imgToFloatNormalize(imgLow);
+			//minValue = Util.getMin(imgLow);
+			//maxValue = Util.getMax(imgLow);
 			
 			this.isInplace = o.isInplace();
 			if (o.isInplace()) {
@@ -119,17 +122,22 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		public ImagePlusImg<FloatType, FloatArray> getFrameLow(int n) {
 			
 			@SuppressWarnings("unchecked")
-			ImagePlusImg<T, A> imgTmp = (ImagePlusImg<T, A>) imgLow.factory().create(width, height);
+			ImagePlusImg<FloatType, FloatArray> imgTmp = (ImagePlusImg<FloatType, FloatArray>) imgLow.factory().create(width, height);
 			imgTmp.setPlane(0, imgLow.getPlane(n));
 			
-			ImagePlusImg<FloatType, FloatArray> frameOut = Util.imgToFloatNormalize(imgTmp, minValue, maxValue);
+			// ImagePlusImg<FloatType, FloatArray> frameOut = Util.imgToFloatNormalize(imgTmp, minValue, maxValue);
 
-			return frameOut;
+			// return frameOut;
+			return imgTmp;
+		}
+		
+		public ImagePlusImg<FloatType, FloatArray> getFramesLow() {
+			return (ImagePlusImg<FloatType, FloatArray>) imgLow;
 		}
 		
 		public ImagePlusImg<T, A> getFrame(int n) {
 			@SuppressWarnings("unchecked")
-			ImagePlusImg<T, A> imgTmp = (ImagePlusImg<T, A>) imgLow.factory().create(width, height);
+			ImagePlusImg<T, A> imgTmp = (ImagePlusImg<T, A>) o.getImg().factory().create(width, height);
 			imgTmp.setPlane(0, o.getImg().getPlane(n));
 			
 			return imgTmp;
@@ -138,6 +146,18 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 	
 	private class IntermediateStructs<T extends NativeType<T> & ComplexType<T>, A extends ArrayDataAccess<A>> 
 	extends LinkedList<IntermediateStruct<T, A>> {
+		
+		public ImagePlusImg<FloatType, FloatArray> getRefLow() {
+			@SuppressWarnings("unchecked")
+			ImagePlusImg<FloatType, FloatArray> out = 
+					(ImagePlusImg<FloatType, FloatArray>) this.getFirst().getFrameLow(0).factory().create(
+							this.getFirst().getWidth(), this.getFirst().getHeight(), this.size());	
+			for (int i = 0; i < this.size(); i++) {
+				out.setPlane(i, Util.getMean3f(this.get(i).getFramesLow(), 
+						registrationJob.getMeanLowIDX(), registrationJob.getMeanUpIDX()).getPlane(0));
+			}
+			return out;
+		}
 		
 		public ImagePlusImg<FloatType, FloatArray> getFramesLow(int n) {
 			
@@ -188,17 +208,18 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		OFsolver ofInstance = registrationJob.getOFinstance();
 		
 		for (RegistrationChannelOptions<?, ?> o : registrationJob) {
-			IntermediateStruct tmp = new IntermediateStruct(o);
+			IntermediateStruct tmp = new IntermediateStruct(o, registrationJob.getNRegistrationTargets());
 			intermediateStructs.add(tmp);
 		}
 		
-		ImagePlusImg<FloatType, FloatArray> ref = intermediateStructs.getFramesLow(2);
+		ImagePlusImg<FloatType, FloatArray> ref = intermediateStructs.getRefLow();
 		ImagePlusImg<FloatType, FloatArray> dataWeightArray = registrationJob.getDataWeightArray();
 		ImagePlusImg<FloatType, FloatArray> wInit = (ImagePlusImg<FloatType, FloatArray>) factory.create(width, height, 2);
+		ImageJFunctions.showFloat(ref, "Reference Frames");
 		
 		startTime = System.currentTimeMillis();
-		IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).parallel().forEach(n -> {
-		//IntStream.rangeClosed(0, registrationJob.getNslices() - 1).forEach(n -> {
+		// IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).parallel().forEach(n -> {
+		IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).forEach(n -> {
 			int idx = registrationJob.getIdxAt(n);
 			ImagePlusImg<FloatType, FloatArray> img = intermediateStructs.getFramesLow(idx);
 			ImagePlusImg registrationTargets = intermediateStructs.getFrames(idx);
@@ -209,10 +230,10 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			for (int i = 0; i < intermediateStructs.size(); i++) {
 				IntermediateStruct s = (IntermediateStruct) intermediateStructs.get(i);
 				
-				if (registrationJob.get(i).isInplace())
-					s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
-				else
+				if (s.isInplace())
 					s.getRegistrationTarget().setPlane(idx, registrationResult.getRegistered().getPlane(i));
+				else
+					s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
 			}
 			
 			processedFrameNotification();
@@ -221,9 +242,10 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		long elapsed = System.currentTimeMillis() - startTime;
 		firePropertyChange("final_time", 0, (double)elapsed / 1000);
 		
+		int counter = 1;
 		for (IntermediateStruct s : intermediateStructs) {
 			if (!s.isInplace)
-				ImageJFunctions.show(s.registrationTarget);
+				ImageJFunctions.show(s.registrationTarget, "registered channel " + counter++);
 		}
 		
 		return null;
