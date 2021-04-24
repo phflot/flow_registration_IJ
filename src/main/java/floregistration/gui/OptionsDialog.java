@@ -364,18 +364,20 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 	private void parseOptions() {
 		switch (registrationQualitySetting) {
 			case 0:
-				registrationJob.setIterations(20);
+				registrationJob.setIterations(30);
+				registrationJob.setEta(0.5f);
+				registrationJob.setLevels(20);
 				break;
 			case 1:
 				registrationJob.setIterations(50);
 				break;
 			case 2:
-				registrationJob.setIterations(100);
-				registrationJob.setEta(0.9f);
+				registrationJob.setIterations(250);
+				registrationJob.setEta(0.8f);
 				break;
 		}
-		int newStride = Integer.parseInt(strideField.getText());
 		
+		int newStride = Integer.parseInt(strideField.getText());
 		registrationJob.setRange(this.registerTarget[0], this.registerTarget[1]);
 		registrationJob.setStride(newStride);
 	}

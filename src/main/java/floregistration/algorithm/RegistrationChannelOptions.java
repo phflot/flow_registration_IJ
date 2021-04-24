@@ -20,7 +20,7 @@ public class RegistrationChannelOptions<T extends NativeType<T> & ComplexType<T>
 	private ImagePlusImg<T, A> imp;
 	
 	private float aData = 0.5f;
-	private final float[] sigma = new float[] {3.0f, 3.0f, 0.1f};
+	private final float[] sigma = new float[] {2.0f, 2.0f, 0.5f};
 	private float weight = 1.0f;
 	private boolean isInplace = false;
 	

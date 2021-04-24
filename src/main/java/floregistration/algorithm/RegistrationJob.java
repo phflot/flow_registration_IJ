@@ -61,7 +61,7 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	 */
 	private int iterations = 50;
 	private int updateLag = 5;
-	private int levels = 50;
+	private int levels = 100;
 	private float eta  = 0.75f;
 	private final float[] alpha = new float[] {0.1f, 0.1f};
 	
