@@ -257,9 +257,10 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			floatIDX[i] = registrationJob.getIdxAt(i);
 		}
 		
-		Plot divergencePlot = new Plot("Mean Divergence", "Samples", "Mean divergence");
+		Plot divergencePlot = new Plot("Mean Divergence", "Samples", "Divergence");
 		divergencePlot.setColor(Color.blue);
 		divergencePlot.addPoints(floatIDX, meanDivergence, Plot.LINE);
+		divergencePlot.addLegend("Mean Divergence");
 		divergencePlot.show();
 		
 		Plot dispPlot = new Plot("Mean and Max Displacements", "Samples", "Displacements");
@@ -268,6 +269,7 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		dispPlot.setColor(Color.red);
 		dispPlot.addPoints(floatIDX, maxDisp, Plot.LINE);
 		dispPlot.addLegend("Mean Displacements\nMax Displacements");
+		dispPlot.setLimits(floatIDX[0], floatIDX[floatIDX.length-1], Util.getMinF(meanDisp), Util.getMaxF(maxDisp));
 		dispPlot.show();
 		
 		int counter = 1;

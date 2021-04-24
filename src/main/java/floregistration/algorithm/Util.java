@@ -522,6 +522,20 @@ public class Util {
 		}
 	}
 	
+	public static double getMinF(float[] inputArray) {
+		double minVal = Double.MAX_VALUE;
+		for (int i = 0; i < inputArray.length; i++)
+			minVal = (double)inputArray[i] < minVal ? (double)inputArray[i] : minVal;
+		return minVal;
+	}
+	
+	public static double getMaxF(float[] inputArray) {
+		double maxVal = Double.MIN_VALUE;
+		for (int i = 0; i < inputArray.length; i++)
+			maxVal = inputArray[i] > maxVal ? inputArray[i] : maxVal;
+		return maxVal;
+	}
+	
 	/**
 	 * Utility functions for vector fields:
 	 */
