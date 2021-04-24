@@ -1,11 +1,13 @@
 package floregistration.algorithm;
 
+import java.awt.Color;
 import java.beans.PropertyChangeSupport;
 import java.util.LinkedList;
 import java.util.stream.IntStream;
 
 import javax.swing.SwingWorker;
 
+import ij.gui.Plot;
 import net.imglib2.algorithm.gauss3.Gauss3;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
@@ -217,9 +219,13 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 		ImagePlusImg<FloatType, FloatArray> wInit = (ImagePlusImg<FloatType, FloatArray>) factory.create(width, height, 2);
 		ImageJFunctions.showFloat(ref, "Reference Frames");
 		
+		float[] meanDivergence = new float[registrationJob.getNRegistrationTargets()];
+		float[] meanDisp = new float[registrationJob.getNRegistrationTargets()];
+		float[] maxDisp = new float[registrationJob.getNRegistrationTargets()];
+		
 		startTime = System.currentTimeMillis();
-		// IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).parallel().forEach(n -> {
-		IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).forEach(n -> {
+		IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).parallel().forEach(n -> {
+		//IntStream.rangeClosed(0, registrationJob.getNRegistrationTargets() - 1).forEach(n -> {
 			int idx = registrationJob.getIdxAt(n);
 			ImagePlusImg<FloatType, FloatArray> img = intermediateStructs.getFramesLow(idx);
 			ImagePlusImg registrationTargets = intermediateStructs.getFrames(idx);
@@ -236,11 +242,33 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 					s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
 			}
 			
+			meanDivergence[n] = registrationResult.getMeanDiv();
+			meanDisp[n] = registrationResult.getMeanDisp();
+			maxDisp[n] = registrationResult.getMaxDisp();
+			
 			processedFrameNotification();
 		});
 		
 		long elapsed = System.currentTimeMillis() - startTime;
 		firePropertyChange("final_time", 0, (double)elapsed / 1000);
+				
+		float[] floatIDX = new float[registrationJob.getNRegistrationTargets()];
+		for (int i = 0; i < floatIDX.length; i++) {
+			floatIDX[i] = registrationJob.getIdxAt(i);
+		}
+		
+		Plot divergencePlot = new Plot("Mean Divergence", "Samples", "Mean divergence");
+		divergencePlot.setColor(Color.blue);
+		divergencePlot.addPoints(floatIDX, meanDivergence, Plot.LINE);
+		divergencePlot.show();
+		
+		Plot dispPlot = new Plot("Mean and Max Displacements", "Samples", "Displacements");
+		dispPlot.setColor(Color.blue);
+		dispPlot.addPoints(floatIDX, meanDisp, Plot.LINE);
+		dispPlot.setColor(Color.red);
+		dispPlot.addPoints(floatIDX, maxDisp, Plot.LINE);
+		dispPlot.addLegend("Mean Displacements\nMax Displacements");
+		dispPlot.show();
 		
 		int counter = 1;
 		for (IntermediateStruct s : intermediateStructs) {

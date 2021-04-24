@@ -195,9 +195,6 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			@Override
 			public void textValueChanged(TextEvent e) {
 				registrationJob.getAlpha()[1] = Float.parseFloat(alphaYField.getText());
-				if (symSmoothBox.getState()) {
-					alphaXField.setText(alphaYField.getText());
-				}
 			}
 		});
 		

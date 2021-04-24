@@ -556,7 +556,7 @@ public class Util {
 			maxMag = tmp > maxMag ? tmp : maxMag;
 		}	
 		
-		return (float) maxMag / (float)u.length;
+		return maxMag;
 	}
 	
 	public static <T extends NumericType<?>, I extends PlanarImg<FloatType, FloatArray>> float getMeanDivergence(I w) {
@@ -569,7 +569,7 @@ public class Util {
 		
 		float div = 0;
 		for (int i = 0; i < ux.length; i++) {
-			div += ux[i] + vy[i];
+			div -= ux[i] + vy[i];
 		}
 		
 		return (float) div / (float)ux.length;

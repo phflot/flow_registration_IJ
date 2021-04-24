@@ -75,14 +75,15 @@ public class OFsolver {
 				
 		PlanarImg<FloatType, FloatArray> w = doOF(img, ref, dataWeightVector, wInit);
 				
-		float meanMag = Util.getMeanMagnitude(w);
-		float maxMag = Util.getMaxMagnitude(w);		
+		float meanDisp = Util.getMeanMagnitude(w);
+		float maxDisp = Util.getMaxMagnitude(w);
+		float meanDiv = Util.getMeanDivergence(w);
 		
 		ImagePlusImg registered = (ImagePlusImg) registrationTargets.copy();
 		
 		Util.warp(registrationTargets, w, registered);
 				
-		RegistrationResult result = new RegistrationResult(registered, w, 0.0f, (float)meanMag, (float)maxMag);
+		RegistrationResult result = new RegistrationResult(registered, w, meanDiv, meanDisp, maxDisp);
 		
 		return result;
 	}
