@@ -218,7 +218,7 @@ public class Util {
 		});
 		
 		for (int i = 0; i < data_array.length; i++)
-			data_array[i] /= (float)high-low;
+			data_array[i] /= (float)high - (float)low + 1.0f;
 		
 		return output;
 	}
