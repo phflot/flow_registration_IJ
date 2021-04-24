@@ -314,7 +314,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			}
 		});
 
-		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href=''>project website</a><br /></html>");
+		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href='https://www.snnu.uni-saarland.de/flow_registration/'>project website</a><br /></html>");
 
 		Panel projectLabelPanel = new Panel();
 		projectLabelPanel.setLayout(this.getLayout());
@@ -328,7 +328,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			public void mouseClicked(MouseEvent e) {
 				try {
 
-					Desktop.getDesktop().browse(new URI("https://phflot.github.io/variational_aligner/"));
+					Desktop.getDesktop().browse(new URI("https://www.snnu.uni-saarland.de/flow_registration/"));
 
 				} catch (IOException | URISyntaxException e1) {
 					e1.printStackTrace();
