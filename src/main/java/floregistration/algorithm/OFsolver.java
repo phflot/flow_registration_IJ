@@ -131,15 +131,16 @@ public class OFsolver {
 		int max_level = warpingDepth(height, width);
 				
 		// low pass filtering is done before to allow 3D smoothing
-		I movingLow = (I) img.copy();
-		I fixedLow = (I) ref.copy();
+		// I movingLow = (I) img.copy();
+		// I fixedLow = (I) ref.copy();
 		
-		I w = (I) wInit.factory().create(wInit);
-		I wTmp = (I) wInit.factory().create(wInit);
+		I w = null; // (I) wInit.factory().create(wInit);
+		I wTmp = null;
+		// I wTmp = (I) wInit.factory().create(wInit);
 		
-		I movingLevel = (I) movingLow.copy();
-		I fixedLevel = (I) fixedLow.copy();
-		I tmp = (I) movingLevel.copy();
+		I movingLevel = null; // (I) movingLow.copy();
+		I fixedLevel = null; // (I) fixedLow.copy();
+		I tmp = null; //  (I) movingLevel.copy();
 		
 		/* outer loop with the pyramid */
 		for (int l = max_level; l >= 0; l--) {
@@ -153,8 +154,8 @@ public class OFsolver {
 			int nxLevel = levelSize[0] + 2;
 			int nyLevel = levelSize[1] + 2;
 			
-			movingLevel = Util.resize(movingLow, levelSize);
-			fixedLevel = Util.resize(fixedLow, levelSize);
+			movingLevel = Util.resize(img, levelSize);
+			fixedLevel = Util.resize(ref, levelSize);
 			
 			float hx = (float)width / (float)levelSize[0];
 			float hy = (float)height / (float)levelSize[1];
@@ -281,7 +282,7 @@ public class OFsolver {
 		    Util.addPut(wTmp, dw);
 		    
 		    w = (I) wTmp.factory().create(new long[] {nxLevel-2, nyLevel-2, 2});
-		    		    
+		    
 		    RandomAccessibleInterval<FloatType> wInner = Views.offsetInterval(wTmp, 
 					new long[] { 1, 1, 0}, 
 					new long[] {nxLevel-2, nyLevel-2, 1});
