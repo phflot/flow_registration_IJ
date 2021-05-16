@@ -28,7 +28,7 @@ If you use parts of this code or the plugin for your work, please cite
 
 BibTeX entry
 ```
-@article{floth20,
+@article{flotea2021b,
     author = {Flotho, P. and Nomura, S. and Kuhn, B. and Strauss, D. J.},
     title = {Software for non-parametric Image Registration of 2-Photon Imaging Data},
 	year = {2021},
