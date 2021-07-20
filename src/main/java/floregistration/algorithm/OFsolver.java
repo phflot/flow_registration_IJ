@@ -113,8 +113,8 @@ public class OFsolver {
 				alpha[i] = alpha_old.length < i ? alpha_old[i] : alpha_old[0];
 		}
 		
-		int idx, idxLeft, idxRight, idxDown, idxUp, ndIdx;
-		float wRight, wLeft, wDown, wUp, wSum, denomU, denomV, numU, numV;
+		int idx, ndIdx, idx_inner;
+		float denomU, denomV, numU, numV, dv_kp1, du_kp1;;
 		
 		// for now only taking the first value of weight and normalizing it:
 		float[] weight = new float[nChannels];
@@ -143,7 +143,9 @@ public class OFsolver {
 		I fixedLevel = null; // (I) fixedLow.copy();
 		I tmp = null; //  (I) movingLevel.copy();
 		
-		/* outer loop with the pyramid */
+		double[] alpha_stencil;
+		int[] s_idx = new int[4];
+		
 		for (int l = max_level; l >= options.minLevel; l--) {
 						
 			double scalingFactor = Math.pow(eta, l);
@@ -160,10 +162,12 @@ public class OFsolver {
 			
 			float hx = (float)width / (float)levelSize[0];
 			float hy = (float)height / (float)levelSize[1];
-			float[] alpha_level = new float[2];
-			for (int i = 0; i < 2; i++) {
-				alpha_level[i] = alpha[i] / (float)Math.pow(eta, (double)i);
-			}
+
+			alpha_stencil = new double[] {
+					alpha[0] / ((hx * hx)/ (float)Math.pow(eta, 0.5f * (double)l)), 
+					alpha[0] / ((hx * hx)/ (float)Math.pow(eta, 0.5f * (double)l)), 
+					alpha[1] / ((hy * hy)/ (float)Math.pow(eta, 0.5f * (double)l)), 
+					alpha[1] / ((hy * hy)/ (float)Math.pow(eta, 0.5f * (double)l))};
 			
 			if (l == max_level) {
 				wTmp = Util.resize(wInit, levelSize);
@@ -206,39 +210,82 @@ public class OFsolver {
 			float[] uPtr = wTmp.getPlane(0).getCurrentStorageArray();
 			float[] vPtr = wTmp.getPlane(1).getCurrentStorageArray();
 
+            for (int i = 0; i < nxLevel; i++) {
+                idx = 0 * nxLevel + i;
+                idx_inner = 1 * nxLevel + i;
+                uPtr[idx] = uPtr[idx_inner];
+                vPtr[idx] = vPtr[idx_inner];
+
+                idx = (nyLevel - 1) * nxLevel + i;
+                idx_inner = (nyLevel - 2) * nxLevel + i;
+                uPtr[idx] = uPtr[idx_inner];
+                vPtr[idx] = vPtr[idx_inner];
+            }
+
+            for (int j = 0; j < nyLevel; j++) {
+                idx = j * nxLevel + 0;
+                idx_inner = j * nxLevel + 1;
+                uPtr[idx] = uPtr[idx_inner];
+                vPtr[idx] = vPtr[idx_inner];
+
+                idx = j * nxLevel + (nxLevel - 1);
+                idx_inner = j * nxLevel + (nxLevel - 2);
+                uPtr[idx] = uPtr[idx_inner];
+                vPtr[idx] = vPtr[idx_inner];
+            }
+			
 			int iterationCounter = 0;
-			/* outer loop: */
 		    while (iterationCounter++ < iterations) {
 		        
 		        if (iterationCounter % updateLag == 0) {
 		            nonlinearity(psi, mt, du, dv, nChannels, aData);
 		        }
+		        
+	            for (int i = 0; i < nxLevel; i++) {
+	                idx = 0 * nxLevel + i;
+	                idx_inner = 1 * nxLevel + i;
+	                du[idx] = du[idx_inner];
+	                dv[idx] = dv[idx_inner];
+
+	                idx = (nyLevel - 1) * nxLevel + i;
+	                idx_inner = (nyLevel - 2) * nxLevel + i;
+	                du[idx] = du[idx_inner];
+	                dv[idx] = dv[idx_inner];
+	            }
+
+	            for (int j = 0; j < nyLevel; j++) {
+	                idx = j * nxLevel + 0;
+	                idx_inner = j * nxLevel + 1;
+	                du[idx] = du[idx_inner];
+	                dv[idx] = dv[idx_inner];
+
+	                idx = j * nxLevel + (nxLevel - 1);
+	                idx_inner = j * nxLevel + (nxLevel - 2);
+	                du[idx] = du[idx_inner];
+	                dv[idx] = dv[idx_inner];
+	            }
 	
-				/* Gauss Seidel step: */
 		        for (int j = 1; j < nyLevel - 1; j++) {
 		        	for (int i = 1; i < nxLevel - 1; i++) {
 		            
 						idx = j * nxLevel + i;
-						idxLeft = j * nxLevel + (i - 1);
-						idxRight = j * nxLevel + (i + 1);
-						idxDown = (j + 1) * nxLevel + i;
-						idxUp = (j - 1) * nxLevel + i;
-
-						wRight = i < nxLevel - 1 ? 
-		                    0.5f * (psiSmooth[idx]  + psiSmooth[idxRight]) * alpha_level[0] / (hx * hx) : 0;
-						wLeft =  i > 1      ? 
-		                    0.5f * (psiSmooth[idx]  + psiSmooth[idxLeft]) * alpha_level[0] / (hx * hx) : 0;
-						wDown =  j < nyLevel - 1 ? 
-		                    0.5f * (psiSmooth[idx]  + psiSmooth[idxDown]) * alpha_level[1] / (hy * hy) : 0;
-						wUp =	  j > 1      ? 
-		                    0.5f * (psiSmooth[idx]  + psiSmooth[idxUp]) * alpha_level[1] / (hy * hy) : 0;
-						wSum = wUp + wDown + wLeft + wRight;
-
-						// summing up the data terms
+	                    s_idx[0] = j * nxLevel + (i - 1);
+	                    s_idx[1] = j * nxLevel + (i + 1);
+	                    s_idx[2] = (j + 1) * nxLevel + i;
+	                    s_idx[3] = (j - 1) * nxLevel + i;
+	                    
 						denomU = 0;
 						denomV = 0;
 						numU = 0;
 						numV = 0;
+	                    
+                        for (int d = 0; d < 4; d++) {
+                            numU += alpha_stencil[d] * (uPtr[s_idx[d]] + du[s_idx[d]] - uPtr[idx]);
+                            numV += alpha_stencil[d] * (vPtr[s_idx[d]] + dv[s_idx[d]] - vPtr[idx]);
+                            denomU += alpha_stencil[d];
+                            denomV += alpha_stencil[d];
+                        }
+
 						for (int k = 0; k < nChannels; k++) {
 							
 							ndIdx = j * nxLevel + i + k * (nxLevel * nyLevel);
@@ -249,34 +296,21 @@ public class OFsolver {
 							denomV += weight[k]  * psi[ndIdx] * mt.j22[ndIdx];
 						}
 	
-						denomU += wSum;
-						denomV += wSum;
-	
-						du[idx] = (1 - OMEGA) * du[idx] +
-							OMEGA * (numU
-								+ wLeft * (uPtr[idxLeft] + du[idxLeft])
-								+ wUp * (uPtr[idxUp] + du[idxUp])
-								+ wDown * (uPtr[idxDown] + du[idxDown])
-								+ wRight  * (uPtr[idxRight] + du[idxRight])
-								- wSum * (uPtr[idx]))
-							/ (denomU);
+	                    du_kp1 = numU / denomU;
+
+						du[idx] = (1 - OMEGA) * du[idx] + OMEGA * du_kp1;
 						
 						for (int k = 0; k < nChannels; k++) {
 							ndIdx = j * nxLevel + i + k * (nxLevel * nyLevel);
 							numV -= weight[k] * psi[ndIdx] * (mt.j23[ndIdx] + mt.j12[ndIdx] * du[idx]);
 						}
 	
-						dv[idx] = (1 - OMEGA) * dv[idx] +
-							OMEGA * (numV
-								+ wLeft * (vPtr[idxLeft] + dv[idxLeft])
-								+ wUp * (vPtr[idxUp] + dv[idxUp])
-								+ wDown * (vPtr[idxDown] + dv[idxDown])
-								+ wRight * (vPtr[idxRight] + dv[idxRight])
-								- wSum * (vPtr[idx]))
-							/ (denomV);
+	                    dv_kp1 = numV / denomV;
+	                	
+						dv[idx] = (1 - OMEGA) * dv[idx] + OMEGA * dv_kp1;
 					}
-				} // GS step
-			} // outer loop
+				}
+			}
 		    
 		    Util.medianBlur5x5(dw);
 		    Util.addPut(wTmp, dw);
