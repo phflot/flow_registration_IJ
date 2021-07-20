@@ -163,11 +163,15 @@ public class OFsolver {
 			float hx = (float)width / (float)levelSize[0];
 			float hy = (float)height / (float)levelSize[1];
 
+			float alphaScaling = 1;
+			if (l != options.minLevel)
+				alphaScaling = (float)Math.pow(eta, 0.5f * (double)l);
+						
 			alpha_stencil = new double[] {
-					alpha[0] / ((hx * hx)/ (float)Math.pow(eta, 0.5f * (double)l)), 
-					alpha[0] / ((hx * hx)/ (float)Math.pow(eta, 0.5f * (double)l)), 
-					alpha[1] / ((hy * hy)/ (float)Math.pow(eta, 0.5f * (double)l)), 
-					alpha[1] / ((hy * hy)/ (float)Math.pow(eta, 0.5f * (double)l))};
+					alpha[0] / ((hx * hx) * alphaScaling),
+					alpha[0] / ((hx * hx) * alphaScaling), 
+					alpha[1] / ((hy * hy) * alphaScaling), 
+					alpha[1] / ((hy * hy) * alphaScaling)};
 			
 			if (l == max_level) {
 				wTmp = Util.resize(wInit, levelSize);
@@ -298,6 +302,7 @@ public class OFsolver {
 	
 	                    du_kp1 = numU / denomU;
 
+	                    // SOR interpolation:
 						du[idx] = (1 - OMEGA) * du[idx] + OMEGA * du_kp1;
 						
 						for (int k = 0; k < nChannels; k++) {
@@ -307,6 +312,7 @@ public class OFsolver {
 	
 	                    dv_kp1 = numV / denomV;
 	                	
+	                    // SOR interpolation: 
 						dv[idx] = (1 - OMEGA) * dv[idx] + OMEGA * dv_kp1;
 					}
 				}
@@ -427,8 +433,6 @@ public class OFsolver {
 				regY = regY < 0.0f ? 0.0f : regY;
 				regX = 1.0f / ((float)Math.pow(Math.sqrt(regX), 2) + eps);
 				regY = 1.0f / ((float)Math.pow(Math.sqrt(regY), 2) + eps);
-				regX = 1.0f;
-				regY = 1.0f;
 				
 				J11[j] = regX * FXXsquared + regY * FXYsquared;
 				J22[j] = regX * FXYsquared + regY * FYYsquared;
