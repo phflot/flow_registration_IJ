@@ -160,6 +160,9 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 					for (RegistrationChannelOptions op : registrationJob) {
 						op.setWeight(weight);
 					}
+					
+					this_tmp.doLayout();
+					this_tmp.validate();
 				}
 			}
 		});
