@@ -318,7 +318,9 @@ public class OFsolver {
 				}
 			}
 		    
-		    Util.medianBlur5x5(dw);
+		    if (l != options.minLevel)
+		    	Util.medianBlur5x5(dw);
+		    
 		    Util.addPut(wTmp, dw);
 		    
 		    w = (I) wTmp.factory().create(new long[] {nxLevel-2, nyLevel-2, 2});
