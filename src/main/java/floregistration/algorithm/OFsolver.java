@@ -28,6 +28,7 @@ public class OFsolver {
 	private float eta;
 	private float sigma;
 	private final float eps = 0.00001f;
+	private RegistrationSolverOptions options;
 		
 	
 	public static void main( String[] args ) {
@@ -47,9 +48,9 @@ public class OFsolver {
 		levels = options.levels;
 		alpha = options.alpha;
 		aData = options.aData;
-		aSmooth = options.aSmooth;
 		eta = options.eta;
 		sigma = options.sigma;
+		this.options = options;
 	}
 
 	
@@ -143,7 +144,7 @@ public class OFsolver {
 		I tmp = null; //  (I) movingLevel.copy();
 		
 		/* outer loop with the pyramid */
-		for (int l = max_level; l >= 0; l--) {
+		for (int l = max_level; l >= options.minLevel; l--) {
 						
 			double scalingFactor = Math.pow(eta, l);
 			
@@ -211,7 +212,6 @@ public class OFsolver {
 		        
 		        if (iterationCounter % updateLag == 0) {
 		            nonlinearity(psi, mt, du, dv, nChannels, aData);
-					nonlinearitySmoothness(psiSmooth, wTmp, dw, aSmooth, hx, hy);
 		        }
 	
 				/* Gauss Seidel step: */
@@ -297,33 +297,14 @@ public class OFsolver {
 		    }
 		} // pyramid
 		
+		if (options.minLevel > 0) {
+			w = Util.resize(w, new int[] {width, height});
+		}
+		
 		return w;
 	}
 	
-	private <I extends PlanarImg<FloatType, FloatArray>> void nonlinearitySmoothness(float[] psiSmooth, 
-			I w, I dw, float a, float hx, float hy) {
-		
-		long width = w.dimension(0);
-		long height = w.dimension(1);
-		
-		I wFull = Util.add(w, dw); 
-		
-		I wx = Util.imgradientX(wFull, hx);
-		I wy = Util.imgradientY(wFull, hy);
-		
-		float[] ux = wx.getPlane(0).getCurrentStorageArray();
-		float[] vx = wx.getPlane(1).getCurrentStorageArray();
-		float[] uy = wy.getPlane(0).getCurrentStorageArray();
-		float[] vy = wy.getPlane(1).getCurrentStorageArray();
-		
-		float tmp;
-		for (int i = 0; i < height * width; i++) {
-			tmp = ux[i] * ux[i] + uy[i] * uy[i] + vx[i] * vx[i] + vy[i] * vy[i];
-			tmp = tmp < 0 ? 0 : tmp;
-			psiSmooth[i] = a * (float)Math.pow(tmp + eps, a - 1);
-		}
-	}
-	
+
 	private <I extends PlanarImg<FloatType, FloatArray>> void nonlinearity(
 			float[] psi, MotionTensor<I> mt, float[] du, float[] dv,
 			int n_channels, float[] a) {

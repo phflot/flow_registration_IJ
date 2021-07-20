@@ -62,7 +62,8 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	private int iterations = 50;
 	private int updateLag = 5;
 	private int levels = 100;
-	private float eta  = 0.75f;
+	private float eta  = 0.8f;
+	private int minLevel = 0;
 	private final float[] alpha = new float[] {0.1f, 0.1f};
 	
 	public int getIterations() {
@@ -113,6 +114,10 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 
 	public int getNslices() {
 		return nSlices;
+	}
+	
+	public void setMinLevel(int minLevel) {
+		this.minLevel = minLevel;
 	}
 	
 	public int getNRegistrationTargets() {
@@ -251,7 +256,8 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		}
 		
 		RegistrationSolverOptions options = new RegistrationSolverOptions(
-				iterations, updateLag, levels, alpha, aData, 1.0f, eta, 0.001f);
+				iterations, updateLag, levels, alpha, aData, eta, 0.001f);
+		options.minLevel = minLevel;
 		
 		return new OFsolver(options);
 	}

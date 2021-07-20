@@ -367,16 +367,19 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 	private void parseOptions() {
 		switch (registrationQualitySetting) {
 			case 0:
-				registrationJob.setIterations(30);
-				registrationJob.setEta(0.5f);
-				registrationJob.setLevels(20);
+				registrationJob.setIterations(50);
+				//registrationJob.setEta(0.5f);
+				//registrationJob.setLevels(20);
+				registrationJob.setMinLevel(6);
 				break;
 			case 1:
 				registrationJob.setIterations(50);
+				registrationJob.setMinLevel(3);
 				break;
 			case 2:
-				registrationJob.setIterations(250);
-				registrationJob.setEta(0.8f);
+				registrationJob.setIterations(50);
+				//registrationJob.setEta(0.8f);
+				registrationJob.setMinLevel(0);
 				break;
 		}
 		
