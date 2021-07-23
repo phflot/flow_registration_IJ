@@ -45,7 +45,9 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.MessageDialog;
 import ij.gui.NonBlockingGenericDialog;
+import ij.gui.YesNoCancelDialog;
 import ij.io.Opener;
+import ij.io.SaveDialog;
 import net.imglib2.img.imageplus.ImagePlusImg;
 import net.imglib2.img.imageplus.ImagePlusImgs;
 
@@ -356,13 +358,19 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		
 		if (this.wasOKed()) {
 			parseOptions();
+			
+			YesNoCancelDialog tmp_dialog = new YesNoCancelDialog(IJ.getInstance(), "Export options", "Export JSON options?");
+			if (tmp_dialog.yesPressed()) {
+				SaveDialog saveDialog = new SaveDialog("Save options", "options.json", ".json");
+				registrationJob.saveOptions(saveDialog.getDirectory(), saveDialog.getFileName());
+			}
+			
 			CompensationProgress progress_dialog = new CompensationProgress(IJ.getInstance(),
 					registrationJob.getNRegistrationTargets());
 			MotionCompensationWorker engine = 
 					new MotionCompensationWorker(registrationJob);
 			engine.addPropertyChangeListener(progress_dialog);
 			progress_dialog.setVisible(true);
-			
 			engine.execute();
 		}
 	}

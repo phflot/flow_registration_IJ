@@ -1,6 +1,18 @@
 package floregistration.algorithm;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
+
+import org.json.simple.JSONObject;
 
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.imageplus.ImagePlusImg;
@@ -65,6 +77,65 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	private float eta  = 0.8f;
 	private int minLevel = 0;
 	private final float[] alpha = new float[] {1.5f, 1.5f};
+	
+	public boolean saveOptions(String directory, String filename) {
+		JSONObject options = new JSONObject();
+		
+		int upper = this.referenceFrames.upper;
+		Integer[] refIdx = new Integer[upper - this.referenceFrames.lower];
+		int counter = 0;
+		for (int i = this.referenceFrames.lower + 1; i <= upper; i++) {
+			refIdx[counter] = i;
+			counter++;
+		}
+		
+		options.put("reference_frames", Arrays.asList(refIdx));
+		
+		options.put("datatype", "MAT");
+		options.put("alpha", Arrays.asList(this.alpha));
+		
+		Float[][] sigma = new Float[this.size()][3];
+		counter = 0;
+		for (RegistrationChannelOptions<?, ?> o : this) {
+			float[] tmp = o.getSigma();
+
+			for (int i = 0; i < 3; i++) {
+				sigma[counter][i] = tmp[i];
+			}
+		}
+		
+		List<List<Float>> sigmaList = new ArrayList<>(sigma.length);
+		for (Float[] s : sigma) {
+			sigmaList.add(Arrays.asList(s));
+		}
+		
+		options.put("sigma", sigmaList);
+		
+		options.put("weight", Arrays.asList(getDataWeight()));
+		
+		options.put("levels", 100);
+		options.put("iterations", 50);
+		options.put("eta", 0.8);
+		options.put("a_smooth", 1);
+		options.put("a_data", 0.45);
+		options.put("update_leg", 5);
+		options.put("min_level", this.minLevel);
+		options.put("channel_normalization", "joint");
+		
+		
+		String outputString = "Compensation options " + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "\r\n\r\n";
+		outputString += options.toJSONString();
+		
+		
+		try {
+			Files.write(Paths.get(directory, filename), outputString.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
 	
 	public int getIterations() {
 		return iterations;
@@ -209,6 +280,15 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		}
 		
 		return dataWeightArray;
+	}
+	
+	public float[] getDataWeight() {
+		float[] weights = new float[this.size()];
+		for (int i = 0; i < this.size(); i++) {
+			RegistrationChannelOptions tmp = this.get(i);
+			weights[i] = tmp.getWeight();
+		}
+		return weights;
 	}
 	
 	public void setReferenceIDX(int lower, int upper) {

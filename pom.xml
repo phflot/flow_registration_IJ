@@ -11,13 +11,13 @@
 
   <groupId>floregistration</groupId>
   <artifactId>floregistration</artifactId>
-  <version>0.0.1-SNAPSHOT_</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
   
-  <name>flo_registration</name>
+  <name>Flow-Registration</name>
     <description>[MY-DESCRIPTION]</description>
     <url>https://github.com/phflot/flow_registration_IJ</url>
-    <inceptionYear>2020</inceptionYear>
+    <inceptionYear>2021</inceptionYear>
     <organization>
         <name>N/A</name>
         <url>N/A</url>

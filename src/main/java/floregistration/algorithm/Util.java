@@ -423,6 +423,11 @@ public class Util {
 			float[] tmp = new float[25];
 			int nx = (int) img.dimension(0);
 			int ny = (int) img.dimension(1);
+			
+			if (nx < 5 || ny < 5) {
+				System.arraycopy(f, 0, out_array, 0, nx * ny);
+			}
+			
 			int idx, idx_kernel;
 			
 			for (int j = 2; j < ny - 2; j++) {
