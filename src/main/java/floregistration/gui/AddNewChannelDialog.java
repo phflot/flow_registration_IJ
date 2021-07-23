@@ -83,7 +83,10 @@ public class AddNewChannelDialog extends GenericDialog {
 		int n_channels = images.size();
 		String[] open_images = new String[n_channels];
 		for (int i = 0; i < n_channels; i++) {
-			open_images[i] = images.get(i).getImagePlus().getShortTitle();
+			 String channel_name = images.get(i).getImagePlus().getShortTitle();
+			 if (channel_name.length() > 25)
+			 	channel_name = "..." + channel_name.substring(channel_name.length()-25);
+			 open_images[i] = channel_name;
 		}
 		
 		// currentImageIMP = ((ImagePlusImg<? extends ComplexType, ? extends ArrayDataAccess>)images.get(0).copy()).getImagePlus();

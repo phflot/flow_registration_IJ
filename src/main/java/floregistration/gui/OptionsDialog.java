@@ -106,7 +106,10 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 						return;
 					}
 					
-					labels.add(new Label(add_new_channel.getRegistrationChannelOptions().getImg().getImagePlus().getTitle()));
+					String channel_name = add_new_channel.getRegistrationChannelOptions().getImg().getImagePlus().getTitle();
+					if (channel_name.length() > 15)
+						channel_name = "..." + channel_name.substring(channel_name.length()-15);
+					labels.add(new Label(channel_name));
 					SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.5f, 0.0f, 10.001f, 0.1);					
 					JSpinner spinner = new JSpinner(spinnerModel);
 					
@@ -317,7 +320,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			}
 		});
 
-		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href='https://www.snnu.uni-saarland.de/flow_registration/'>project website</a><br /></html>");
+		JLabel projectLink = new JLabel("<html><hr>This plugin is based on a publication,<br />please visit our <a href='https://www.snnu.uni-saarland.de/flow-registration/'>project website</a><br /></html>");
 
 		Panel projectLabelPanel = new Panel();
 		projectLabelPanel.setLayout(this.getLayout());
@@ -331,7 +334,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 			public void mouseClicked(MouseEvent e) {
 				try {
 
-					Desktop.getDesktop().browse(new URI("https://www.snnu.uni-saarland.de/flow_registration/"));
+					Desktop.getDesktop().browse(new URI("https://www.snnu.uni-saarland.de/flow-registration/"));
 
 				} catch (IOException | URISyntaxException e1) {
 					e1.printStackTrace();
@@ -374,7 +377,7 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 				break;
 			case 1:
 				registrationJob.setIterations(50);
-				registrationJob.setMinLevel(3);
+				registrationJob.setMinLevel(4);
 				break;
 			case 2:
 				registrationJob.setIterations(50);
