@@ -178,7 +178,6 @@ public class OptionsDialog extends NonBlockingGenericDialog {
 		addSlider("Smoothness x", 0.1, 5, registrationJob.getAlpha()[0]);
 		final TextField alphaXField = ((TextField)super.getNumericFields().lastElement());
 		registrationJob.getAlpha()[0] = Float.parseFloat(alphaXField.getText());
-
 		
 		// Selection of alpha y:
 		addSlider("Smoothness y", 0.1, 5, registrationJob.getAlpha()[1]);

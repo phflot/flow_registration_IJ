@@ -130,6 +130,12 @@ public class OFsolver {
 		}
 		
 		int max_level = warpingDepth(height, width);
+		
+		if (max_level <= options.minLevel)
+			options.minLevel = max_level - 1;
+		if (options.minLevel < 0)
+			options.minLevel = 0;
+		
 				
 		// low pass filtering is done before to allow 3D smoothing
 		// I movingLow = (I) img.copy();
@@ -318,8 +324,7 @@ public class OFsolver {
 				}
 			}
 		    
-		    if (l != options.minLevel)
-		    	Util.medianBlur5x5(dw);
+	    	Util.medianBlur5x5(dw);
 		    
 		    Util.addPut(wTmp, dw);
 		    
