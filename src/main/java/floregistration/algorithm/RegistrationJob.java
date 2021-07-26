@@ -12,8 +12,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.json.simple.JSONObject;
+import org.apache.commons.lang.ArrayUtils;
+// import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
+import ij.util.ArrayUtil;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.imageplus.ImagePlusImg;
 import net.imglib2.img.imageplus.ImagePlusImgFactory;
@@ -91,8 +94,7 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		
 		options.put("reference_frames", Arrays.asList(refIdx));
 		
-		options.put("datatype", "MAT");
-		options.put("alpha", Arrays.asList(this.alpha));
+		options.put("alpha", Arrays.asList(ArrayUtils.toObject(this.alpha)));
 		
 		Float[][] sigma = new Float[this.size()][3];
 		counter = 0;
@@ -111,20 +113,20 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 		
 		options.put("sigma", sigmaList);
 		
-		options.put("weight", Arrays.asList(getDataWeight()));
+		options.put("weight", Arrays.asList(ArrayUtils.toObject(getDataWeight())));
 		
 		options.put("levels", 100);
 		options.put("iterations", 50);
 		options.put("eta", 0.8);
 		options.put("a_smooth", 1);
 		options.put("a_data", 0.45);
-		options.put("update_leg", 5);
+		options.put("update_lag", 5);
 		options.put("min_level", this.minLevel);
 		options.put("channel_normalization", "joint");
 		
 		
 		String outputString = "Compensation options " + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "\r\n\r\n";
-		outputString += options.toJSONString();
+		outputString += options.toString();
 		
 		
 		try {
