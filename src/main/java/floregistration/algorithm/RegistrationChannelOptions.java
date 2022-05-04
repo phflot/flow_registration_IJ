@@ -61,10 +61,16 @@ public class RegistrationChannelOptions<T extends NativeType<T> & ComplexType<T>
 	}
 	
 	public RegistrationChannelOptions(ImagePlusImg<T, A> imp) {
+		System.out.println("imp channels = " + imp.getChannels());
+		System.out.println("imp depth = " + imp.getDepth());
+		System.out.println("imp frames = " + imp.getFrames());
 		this.imp = imp;
 	}
 	
 	public RegistrationChannelOptions(ImagePlusImg<T, A> imp, float weight) {
+		System.out.println("imp channels = " + imp.getChannels());
+		System.out.println("imp depth = " + imp.getDepth());
+		System.out.println("imp frames = " + imp.getFrames());
 		this.imp = imp;
 		this.weight = weight;
 	}
@@ -74,6 +80,10 @@ public class RegistrationChannelOptions<T extends NativeType<T> & ComplexType<T>
 	}
 
 	public void setImg(ImagePlusImg<T, A> imp) {
+
+		System.out.println("imp channels = " + imp.getChannels());
+		System.out.println("imp depth = " + imp.getDepth());
+		System.out.println("imp frames = " + imp.getFrames());
 		this.imp = imp;
 	}
 	

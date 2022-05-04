@@ -89,12 +89,20 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			
 			long[] dimsL = new long[o.getImg().numDimensions()];
 			o.getImg().dimensions(dimsL);
+			for (int i = 0; i < dimsL.length; i++)
+				System.out.println("long dims " + i + " = " + dimsL[i]);
+			
 			int[] dims = new int[o.getImg().numDimensions()];
 			int counter = 0;
 			for (long l : dimsL) {
 				dims[counter] = (int)Math.max(Math.min(l, Integer.MAX_VALUE), Integer.MIN_VALUE);
 				counter++;
 			}
+			//int[] dims = new int[4];
+			//dims[0] = o.getImg().getWidth();
+			//dims[1] = o.getImg().getHeight();
+			//dims[2] = o.getImg().getChannels();
+			//dims[3] = o.getImg().getDepth();
 			
 			int nSlicesOrig = dims[2];
 			dims[2] = o.isInplace() ? dims[2] : nFrames;
@@ -117,7 +125,13 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			if (o.isInplace()) {
 				registrationTarget = o.getImg();
 			} else {
+				System.out.println("o.getImg depth = " + o.getImg().getDepth());
+				o.getImg().dimensions(dimsL);
 				registrationTarget = (ImagePlusImg<T, A>) o.getImg().factory().create(dims);
+				// registrationTarget.
+				System.out.println("registrationTarget depth = " + registrationTarget.getDepth());
+				System.out.println("registrationTarget numSlices = " + registrationTarget.numSlices());
+				System.out.println("registrationTarget slice steps = " + registrationTarget.slice);
 			}
 		}
 		
@@ -240,14 +254,30 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 					s.getRegistrationTarget().setPlane(idx, registrationResult.getRegistered().getPlane(i));
 				else
 					s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
+				
+				if (i == 0) {
+					System.out.println("frames = " + s.getRegistrationTarget().getFrames());
+					System.out.println("depth = " + s.getRegistrationTarget().getDepth());
+					System.out.println("channels = " + s.getRegistrationTarget().getChannels());
+				}
 			}
 			
 			meanDivergence[n] = registrationResult.getMeanDiv();
 			meanDisp[n] = registrationResult.getMeanDisp();
 			maxDisp[n] = registrationResult.getMaxDisp();
 			
-			processedFrameNotification();
+			(ImagePlusImg<FloatType, FloatArray>)processedFrameNotification();
 		});
+		
+		
+		for (int i = 0; i < intermediateStructs.size(); i++) {
+			IntermediateStruct s = (IntermediateStruct) intermediateStructs.get(i);
+			
+			if (!s.isInplace()) {
+				s.getRegistrationTarget().
+			}
+		}
+		
 		
 		long elapsed = System.currentTimeMillis() - startTime;
 		firePropertyChange("final_time", 0, (double)elapsed / 1000);
