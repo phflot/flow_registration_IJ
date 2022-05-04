@@ -3,7 +3,10 @@ package floregistration.gui;
 import java.awt.Frame;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.awt.event.WindowEvent;
 import java.util.LinkedList;
 
@@ -74,11 +77,53 @@ public class ReferenceDialog extends GenericDialog {
 		rangeSlider.setUpperValue(Math.min(10, (int)nFrames));
 		rangeSliderPanel.add(rangeSlider);
 		addPanel(rangeSliderPanel);
+		addNumericField("First Frame", rangeSlider.getValue());
+		TextField lower = ((TextField)super.getNumericFields().lastElement());
+		addNumericField("Last Frame", rangeSlider.getUpperValue());
+		TextField higher = ((TextField)super.getNumericFields().lastElement());
 		
 		rangeSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				lower.setText(String.valueOf(rangeSlider.getValue()));
+				higher.setText(String.valueOf(rangeSlider.getUpperValue()));
 				updateMeanImage();
+			}
+		});
+		
+		lower.addTextListener(new TextListener() {
+			@Override
+			public void textValueChanged(TextEvent e) {
+				if (lower.isCursorSet()) {
+					int l = rangeSlider.getValue();
+					int h = rangeSlider.getUpperValue();
+
+					try {
+					    l = Integer.parseInt(lower.getText());
+					} catch (NumberFormatException error) { }
+
+					l = l < h ? l : h;
+					
+					rangeSlider.setValue(l);
+				}
+			}
+		});
+		
+		higher.addTextListener(new TextListener() {
+			@Override
+			public void textValueChanged(TextEvent e) {
+				if (lower.isCursorSet()) {
+					int l = rangeSlider.getValue();
+					int h = rangeSlider.getUpperValue();
+
+					try {
+					    h = Integer.parseInt(higher.getText());
+					} catch (NumberFormatException error) { }
+
+					h = l < h ? h : l;
+					
+					rangeSlider.setUpperValue(h);
+				}
 			}
 		});
 		

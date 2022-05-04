@@ -92,8 +92,6 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			
 			long[] dimsL = new long[o.getImg().numDimensions()];
 			o.getImg().dimensions(dimsL);
-			for (int i = 0; i < dimsL.length; i++)
-				System.out.println("long dims " + i + " = " + dimsL[i]);
 			
 			int[] dims = new int[o.getImg().numDimensions()];
 			int counter = 0;
@@ -129,13 +127,8 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			if (o.isInplace()) {
 				registrationTarget = o.getImg();
 			} else {
-				System.out.println("o.getImg depth = " + o.getImg().getDepth());
 				o.getImg().dimensions(dimsL);
-				// registrationTarget = (ImagePlusImg<T, A>) o.getImg().factory().create(dims);
 				registrationTarget = (ImagePlusImg<T, A>) o.getImg().factory().create(dims[0], dims[1], 1, 1, dims[2]);
-				// registrationTarget.
-				System.out.println("registrationTarget depth = " + registrationTarget.getDepth());
-				System.out.println("registrationTarget numSlices = " + registrationTarget.numSlices());
 			}
 		}
 		
@@ -258,12 +251,6 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 					s.getRegistrationTarget().setPlane(idx, registrationResult.getRegistered().getPlane(i));
 				else
 					s.getRegistrationTarget().setPlane(n, registrationResult.getRegistered().getPlane(i));
-				
-				if (i == 0) {
-					System.out.println("frames = " + s.getRegistrationTarget().getFrames());
-					System.out.println("depth = " + s.getRegistrationTarget().getDepth());
-					System.out.println("channels = " + s.getRegistrationTarget().getChannels());
-				}
 			}
 			
 			meanDivergence[n] = registrationResult.getMeanDiv();
@@ -273,14 +260,6 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			processedFrameNotification();
 		});
 		
-		
-		for (int i = 0; i < intermediateStructs.size(); i++) {
-			IntermediateStruct s = (IntermediateStruct) intermediateStructs.get(i);
-			
-			if (!s.isInplace()) {
-				// s.getRegistrationTarget().
-			}
-		}
 		
 		final ImgFactory< FloatType > imgFactory = new CellImgFactory<>( new FloatType(), 5 );
 		 
