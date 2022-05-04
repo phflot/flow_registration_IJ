@@ -255,7 +255,7 @@ public class RegistrationJob extends LinkedList<RegistrationChannelOptions>{
 	}
 	
 	private void updateIndices() {
-		int nRegistrationFrames = (int)Math.round((double)(this.upperIDX - this.lowerIDX) / (double)this.stride);
+		int nRegistrationFrames = (int)Math.round((double)(this.upperIDX - this.lowerIDX + 1) / (double)this.stride);
 		this.registrationIDX = new int[nRegistrationFrames];
 		for (int i = 0; i < nRegistrationFrames; i++) {
 			this.registrationIDX[i] = i * this.stride + this.lowerIDX;
