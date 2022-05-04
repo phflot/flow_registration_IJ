@@ -9,8 +9,11 @@ import javax.swing.SwingWorker;
 
 import ij.gui.Plot;
 import net.imglib2.algorithm.gauss3.Gauss3;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
+import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.imageplus.ImagePlusImg;
 import net.imglib2.img.imageplus.ImagePlusImgFactory;
@@ -101,8 +104,9 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			//int[] dims = new int[4];
 			//dims[0] = o.getImg().getWidth();
 			//dims[1] = o.getImg().getHeight();
-			//dims[2] = o.getImg().getChannels();
+			//dims[2] = 1;
 			//dims[3] = o.getImg().getDepth();
+			//dims[4] = o.getImg().getDepth();
 			
 			int nSlicesOrig = dims[2];
 			dims[2] = o.isInplace() ? dims[2] : nFrames;
@@ -127,11 +131,11 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			} else {
 				System.out.println("o.getImg depth = " + o.getImg().getDepth());
 				o.getImg().dimensions(dimsL);
-				registrationTarget = (ImagePlusImg<T, A>) o.getImg().factory().create(dims);
+				// registrationTarget = (ImagePlusImg<T, A>) o.getImg().factory().create(dims);
+				registrationTarget = (ImagePlusImg<T, A>) o.getImg().factory().create(dims[0], dims[1], 1, 1, dims[2]);
 				// registrationTarget.
 				System.out.println("registrationTarget depth = " + registrationTarget.getDepth());
 				System.out.println("registrationTarget numSlices = " + registrationTarget.numSlices());
-				System.out.println("registrationTarget slice steps = " + registrationTarget.slice);
 			}
 		}
 		
@@ -266,7 +270,7 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			meanDisp[n] = registrationResult.getMeanDisp();
 			maxDisp[n] = registrationResult.getMaxDisp();
 			
-			(ImagePlusImg<FloatType, FloatArray>)processedFrameNotification();
+			processedFrameNotification();
 		});
 		
 		
@@ -274,10 +278,16 @@ public class MotionCompensationWorker extends SwingWorker<Void, Void> {
 			IntermediateStruct s = (IntermediateStruct) intermediateStructs.get(i);
 			
 			if (!s.isInplace()) {
-				s.getRegistrationTarget().
+				// s.getRegistrationTarget().
 			}
 		}
 		
+		final ImgFactory< FloatType > imgFactory = new CellImgFactory<>( new FloatType(), 5 );
+		 
+		// create an 3d-Img with dimensions 20x30x40 (here cellsize is 5x5x5)Ø
+		final Img< FloatType > img1 = imgFactory.create( 20, 30, 1, 50 );
+		ImageJFunctions.show( img1 );
+
 		
 		long elapsed = System.currentTimeMillis() - startTime;
 		firePropertyChange("final_time", 0, (double)elapsed / 1000);
